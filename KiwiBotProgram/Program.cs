@@ -14,6 +14,7 @@ using System.Xml.XPath;
 using System.Text.RegularExpressions;
 using System.Net;
 using KiwiBotProgram;
+using System.Threading;
 
 /*
 *  built by andrew dechristopher
@@ -42,7 +43,7 @@ namespace InstructionsForTut
         string buildDate = "1/20/2016 @ 12:46 PM EST";
 
         static string user, pass;
-        static string authCode;
+        static string authCode = "";
 
         static bool displayQueue = false;
         static bool availableServer = true;
@@ -84,6 +85,7 @@ namespace InstructionsForTut
         static void Main(string[] args)
         {
             Program program = new Program();
+            List<Thread> Threads = new List<Thread>();
 
             /*
             if (!File.Exists("chat.txt"))
@@ -134,7 +136,7 @@ namespace InstructionsForTut
             List<SteamBot> SteamBots = new List<SteamBot>();
             QueueManager queueManager = new QueueManager();
 
-            for (int i = 0; i < botNumber; botNumber++)
+            for (int i = 0; i < botNumber; i++)
             {
 
                 Console.Write(">> Username: ");
@@ -146,10 +148,12 @@ namespace InstructionsForTut
                 pass = program.ReadPassword();
 
                 SteamBot steamBot = new SteamBot(user, pass, authCode, queueManager);
-                steamBot.SteamLogIn();
+                Threads.Add(new Thread(new ThreadStart(steamBot.SteamLogIn)));
                 SteamBots.Add(steamBot);
                 queueManager.steamBots.Add(steamBot);
             }
+
+            Threads.ForEach(t => t.Start());
 
             //wait for stuff to happennnnnnn
             queueManager.qTimer();
